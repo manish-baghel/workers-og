@@ -4,6 +4,7 @@ import { Resvg, initWasm } from "@resvg/resvg-wasm";
 import { parseHtml } from "./parseHtml";
 import { loadGoogleFont } from "./font";
 import type { ImageResponseOptions } from "./types";
+import { loadDynamicAsset } from "./emoji";
 
 // @ts-expect-error .wasm files are not typed
 import yogaWasm from "../vendors/yoga.wasm";
@@ -12,8 +13,11 @@ import resvgWasm from "../vendors/resvg.wasm";
 
 const initResvgWasm = async () => {
   try {
+    console.log("init RESVG");
     await initWasm(resvgWasm as WebAssembly.Module);
+    console.log("init RESVG");
   } catch (err) {
+    console.log(err);
     if (err instanceof Error && err.message.includes("Already initialized")) {
       return;
     }
@@ -24,7 +28,7 @@ const initResvgWasm = async () => {
 const initYogaWasm = async () => {
   try {
     const yoga = await initYoga(yogaWasm);
-    await init(yoga);
+    init(yoga);
   } catch (err) {
     throw err;
   }
@@ -95,6 +99,11 @@ export const og = async ({ element, options }: Props) => {
             style: "normal",
           },
         ],
+    loadAdditionalAsset: options.emoji
+      ? loadDynamicAsset({
+          emoji: options.emoji,
+        })
+      : undefined,
   });
 
   const format = options?.format || "png";
@@ -126,7 +135,7 @@ export const og = async ({ element, options }: Props) => {
 export class ImageResponse extends Response {
   constructor(
     element: string | React.ReactNode,
-    options: ImageResponseOptions
+    options: ImageResponseOptions,
   ) {
     super();
 
